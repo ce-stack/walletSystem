@@ -2,8 +2,7 @@ package com.amiryousef.wallet.models;
 
 import jakarta.persistence.*;
 
-
 @Entity
-@Table(name = "transactions")
-public class Transaction {
+@Table(name = "wallets")
+public class Wallet {
 }
