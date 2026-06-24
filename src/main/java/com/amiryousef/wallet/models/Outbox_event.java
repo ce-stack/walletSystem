@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 
-@Entity
-@Table(name = "outbox_events")
+//@Entity
+//@Table(name = "outbox_events")
 public class Outbox_event {
 
 

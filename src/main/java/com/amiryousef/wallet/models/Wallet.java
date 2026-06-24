@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 
-@Entity
-@Table(name = "wallets")
+//@Entity
+//@Table(name = "wallets")
 public class Wallet {
 
     @Id

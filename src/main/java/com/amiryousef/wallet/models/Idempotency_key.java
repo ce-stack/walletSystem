@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 
-@Entity
-@Table(name = "idempotency_keys")
+//@Entity
+//@Table(name = "idempotency_keys")
 public class Idempotency_key {
 
     @Id
