@@ -1,4 +1,4 @@
-package com.amiryousef.wallet.models;
+package com.system.wallet.models;
 
 import jakarta.persistence.*;
 
