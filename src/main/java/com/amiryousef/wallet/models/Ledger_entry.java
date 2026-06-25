@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 
-//@Entity
-//@Table(name = "ledger_entries")
+@Entity
+@Table(name = "ledger_entries")
 public class Ledger_entry {
 
     @Id
