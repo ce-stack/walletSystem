@@ -31,6 +31,11 @@ public class Wallet {
     @Column(name = "date")
     private Date date;
 
+
+    public Wallet() {
+
+    }
+
     public Wallet(User user, Double balance, String currency, String status, int version, Date date) {
         this.user = user;
         this.balance = balance;
