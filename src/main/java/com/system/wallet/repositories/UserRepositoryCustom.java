@@ -4,5 +4,6 @@ import com.system.wallet.models.Wallet;
 
 public interface UserRepositoryCustom {
 
-    void creteWallet(Wallet wallet , int id);
+    void creteWallet(Wallet wallet);
+
 }

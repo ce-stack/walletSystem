@@ -17,7 +17,8 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
     @Override
     @Transactional
-    public void creteWallet(Wallet wallet, int id) {
+    public void creteWallet(Wallet wallet) {
         entityManager.persist(wallet);
     }
+
 }

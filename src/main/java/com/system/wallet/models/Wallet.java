@@ -28,21 +28,19 @@ public class Wallet {
     @Column(name = "version")
     private int version;
 
-    @Column(name = "date")
-    private Date date;
 
 
     public Wallet() {
 
     }
 
-    public Wallet(User user, Double balance, String currency, String status, int version, Date date) {
+    public Wallet(User user, Double balance, String currency, String status, int version) {
         this.user = user;
         this.balance = balance;
         this.currency = currency;
         this.status = status;
         this.version = version;
-        this.date = date;
+        //this.date = date;
     }
 
     public int getId() {
@@ -93,11 +91,11 @@ public class Wallet {
         this.version = version;
     }
 
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
+//    public Date getDate() {
+//        return date;
+//    }
+//
+//    public void setDate(Date date) {
+//        this.date = date;
+//    }
 }
