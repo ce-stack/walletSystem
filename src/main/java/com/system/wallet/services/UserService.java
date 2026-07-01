@@ -25,7 +25,7 @@ public class UserService {
 
     public ApiResponse create_wallet(WalletRequest walletRequest) {
         Wallet wallet = new Wallet();
-        User user = userRepository.findById(1)
+        User user = userRepository.findById(2)
                 .orElseThrow(() -> new RuntimeException("Default user with id 1 not found"));
         wallet.setUser(user);
         wallet.setBalance(walletRequest.getBalance());
