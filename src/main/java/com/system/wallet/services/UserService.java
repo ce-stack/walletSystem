@@ -51,14 +51,6 @@ public class UserService {
         Wallet fromWallet = getWalletOrThrow(fromWalletId);
         Wallet toWallet = getWalletOrThrow(toWalletId);
 
-        System.out.println("FROM WALLET ID = " + fromWallet.getId());
-        System.out.println("FROM WALLET STATUS = [" + fromWallet.getStatus() + "]");
-        System.out.println("FROM WALLET STATUS LENGTH = " + fromWallet.getStatus().length());
-
-        System.out.println("TO WALLET ID = " + toWallet.getId());
-        System.out.println("TO WALLET STATUS = [" + toWallet.getStatus() + "]");
-        System.out.println("TO WALLET STATUS LENGTH = " + toWallet.getStatus().length());
-
         if (!checkIfWalletsNotTheSame(fromWalletId, toWalletId)) {
             return new ApiResponse("You cannot transfer to the same wallet", false, 400);
         }
@@ -88,4 +80,6 @@ public class UserService {
                 && wallet.getStatus() != null
                 && wallet.getStatus().trim().equalsIgnoreCase("active");
     }
+
+
 }
