@@ -49,12 +49,29 @@ public class UserService {
 
         Integer fromWalletId = transferWalletRequest.getFrom_wallet_id();
         Integer toWalletId = transferWalletRequest.getTo_wallet_id();
+        Double amount = transferWalletRequest.getAmount();
 
-        Wallet fromWallet = getWalletOrThrow(fromWalletId);
-        Wallet toWallet = getWalletOrThrow(toWalletId);
+        if (fromWalletId == null || toWalletId == null) {
+            return new ApiResponse("Wallet ids are required", false, 400);
+        }
 
         if (!checkIfWalletsNotTheSame(fromWalletId, toWalletId)) {
             return new ApiResponse("You cannot transfer to the same wallet", false, 400);
+        }
+
+        if (amount == null || amount <= 0) {
+            return new ApiResponse("Amount must be greater than zero", false, 400);
+        }
+
+        Wallet fromWallet;
+        Wallet toWallet;
+
+        if (fromWalletId < toWalletId) {
+            fromWallet = getWalletForUpdateOrThrow(fromWalletId);
+            toWallet = getWalletForUpdateOrThrow(toWalletId);
+        } else {
+            toWallet = getWalletForUpdateOrThrow(toWalletId);
+            fromWallet = getWalletForUpdateOrThrow(fromWalletId);
         }
 
         if (!checkWalletStatus(fromWallet)) {
@@ -65,22 +82,30 @@ public class UserService {
             return new ApiResponse("Receiver wallet is not active", false, 400);
         }
 
+        if (fromWallet.getBalance() < amount) {
+            return new ApiResponse("Insufficient balance", false, 400);
+        }
+
+        afterPayment(fromWallet, toWallet, amount);
+
+        storeTheTransaction(transferWalletRequest, fromWallet, toWallet);
+
+        return new ApiResponse("transfer done!", true, 200);
+    }
+
+    private void storeTheTransaction(TransferWalletRequest transferWalletRequest,Wallet fromWallet,Wallet toWallet) {
         Transaction transaction = new Transaction();
+
         transaction.setAmount(transferWalletRequest.getAmount());
-        transaction.setTo_wallet_id(fromWallet);
-        transaction.setFrom_wallet_id(toWallet);
-        transaction.setStatus("active");
-        transaction.setRef_no(123);
+
+        transaction.setFrom_wallet_id(fromWallet);
+        transaction.setTo_wallet_id(toWallet);
+
+        transaction.setStatus("done");
+        transaction.setRef_no(generateRefNo());
         transaction.setTypes("transfer");
 
         transactionRepository.save(transaction);
-        afterPayemnt(fromWalletId , toWalletId , toWallet.getBalance(), fromWallet.getBalance() , transferWalletRequest.getAmount());
-        return new ApiResponse("transfer done !", true, 200);
-    }
-
-    private Wallet getWalletOrThrow(Integer walletId) {
-        return walletRepository.findById(walletId)
-                .orElseThrow(() -> new RuntimeException("Wallet with id " + walletId + " not found"));
     }
 
     private boolean checkIfWalletsNotTheSame(Integer fromWalletId, Integer toWalletId) {
@@ -93,20 +118,24 @@ public class UserService {
                 && wallet.getStatus().trim().equalsIgnoreCase("active");
     }
 
-    @Transactional
-    private void afterPayemnt(Integer fromWalletId, Integer toWalletId , Double toBalance , Double fromBalance , Double amount) {
-        Wallet fromWallet = walletRepository.findById(fromWalletId).orElseThrow(() -> new RuntimeException("Wallet with id " + fromWalletId + " not found"));
-        Wallet toWallet = walletRepository.findById(toWalletId).orElseThrow(() -> new RuntimeException("Wallet with id " + toWalletId + " not found"));
+    private void afterPayment(Wallet fromWallet, Wallet toWallet, Double amount) {
 
         Double newBalanceFrom = fromWallet.getBalance() - amount;
         fromWallet.setBalance(newBalanceFrom);
-        walletRepository.save(fromWallet);
 
         Double newBalanceTo = toWallet.getBalance() + amount;
         toWallet.setBalance(newBalanceTo);
-        walletRepository.save(toWallet);
 
+        walletRepository.save(fromWallet);
+        walletRepository.save(toWallet);
     }
 
+    private Wallet getWalletForUpdateOrThrow(Integer walletId) {
+        return walletRepository.findByIdForUpdate(walletId)
+                .orElseThrow(() -> new RuntimeException("Wallet with id " + walletId + " not found"));
+    }
 
+    private Integer generateRefNo() {
+        return (int) (System.currentTimeMillis() % 1000000000);
+    }
 }
