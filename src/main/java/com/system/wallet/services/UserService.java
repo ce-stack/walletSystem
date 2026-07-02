@@ -2,9 +2,11 @@ package com.system.wallet.services;
 
 import com.system.wallet.dto.request.TransferWalletRequest;
 import com.system.wallet.dto.request.WalletRequest;
+import com.system.wallet.models.Transaction;
 import com.system.wallet.models.User;
 import com.system.wallet.models.Wallet;
 import com.system.wallet.payload.ApiResponse;
+import com.system.wallet.repositories.TransactionRepository;
 import com.system.wallet.repositories.UserRepository;
 import com.system.wallet.repositories.UserRepositoryCustom;
 import com.system.wallet.repositories.WalletRepository;
@@ -19,13 +21,13 @@ public class UserService {
     private UserRepositoryCustom userRepositoryCustom;
     private UserRepository userRepository;
     private WalletRepository walletRepository;
+    private TransactionRepository transactionRepository;
 
-    public UserService(UserRepositoryCustom userRepositoryCustom , UserRepository userRepository , WalletRepository walletRepository) {
+    public UserService(UserRepositoryCustom userRepositoryCustom , UserRepository userRepository , WalletRepository walletRepository , TransactionRepository transactionRepository) {
         this.userRepositoryCustom = userRepositoryCustom;
         this.userRepository = userRepository;
         this.walletRepository = walletRepository;
-
-
+        this.transactionRepository = transactionRepository;
     }
 
     public ApiResponse create_wallet(WalletRequest walletRequest) {
@@ -63,6 +65,16 @@ public class UserService {
             return new ApiResponse("Receiver wallet is not active", false, 400);
         }
 
+        Transaction transaction = new Transaction();
+        transaction.setAmount(transferWalletRequest.getAmount());
+        transaction.setTo_wallet_id(fromWallet);
+        transaction.setFrom_wallet_id(toWallet);
+        transaction.setStatus("active");
+        transaction.setRef_no(123);
+        transaction.setTypes("transfer");
+
+        transactionRepository.save(transaction);
+        afterPayemnt(fromWalletId , toWalletId , toWallet.getBalance(), fromWallet.getBalance() , transferWalletRequest.getAmount());
         return new ApiResponse("transfer done !", true, 200);
     }
 
@@ -79,6 +91,21 @@ public class UserService {
         return wallet != null
                 && wallet.getStatus() != null
                 && wallet.getStatus().trim().equalsIgnoreCase("active");
+    }
+
+    @Transactional
+    private void afterPayemnt(Integer fromWalletId, Integer toWalletId , Double toBalance , Double fromBalance , Double amount) {
+        Wallet fromWallet = walletRepository.findById(fromWalletId).orElseThrow(() -> new RuntimeException("Wallet with id " + fromWalletId + " not found"));
+        Wallet toWallet = walletRepository.findById(toWalletId).orElseThrow(() -> new RuntimeException("Wallet with id " + toWalletId + " not found"));
+
+        Double newBalanceFrom = fromWallet.getBalance() - amount;
+        fromWallet.setBalance(newBalanceFrom);
+        walletRepository.save(fromWallet);
+
+        Double newBalanceTo = toWallet.getBalance() + amount;
+        toWallet.setBalance(newBalanceTo);
+        walletRepository.save(toWallet);
+
     }
 
 
