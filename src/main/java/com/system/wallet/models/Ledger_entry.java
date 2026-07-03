@@ -1,5 +1,6 @@
 package com.system.wallet.models;
 
+import com.system.wallet.config.LedgerType;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -21,7 +22,8 @@ public class Ledger_entry {
     private Wallet wallet_id;
 
     @Column(name = "types")
-    private String types;
+    @Enumerated(EnumType.STRING)
+    private LedgerType types;
 
     @Column(name = "amount")
     private Double amount;
@@ -36,7 +38,7 @@ public class Ledger_entry {
 
     }
 
-    public Ledger_entry(Transaction transaction_id, Wallet wallet_id, String types, Double amount, Double balance_after, Date created_at) {
+    public Ledger_entry(Transaction transaction_id, Wallet wallet_id, LedgerType types, Double amount, Double balance_after, Date created_at) {
         this.transaction_id = transaction_id;
         this.wallet_id = wallet_id;
         this.types = types;
@@ -69,11 +71,11 @@ public class Ledger_entry {
         this.wallet_id = wallet_id;
     }
 
-    public String getTypes() {
+    public LedgerType getTypes() {
         return types;
     }
 
-    public void setTypes(String types) {
+    public void setTypes(LedgerType types) {
         this.types = types;
     }
 

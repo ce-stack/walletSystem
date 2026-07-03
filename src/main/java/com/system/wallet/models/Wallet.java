@@ -1,5 +1,6 @@
 package com.system.wallet.models;
 
+import com.system.wallet.config.WalletStatus;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -23,7 +24,8 @@ public class Wallet {
     private String currency;
 
     @Column(name = "status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private WalletStatus status;
 
     @Column(name = "version")
     private int version;
@@ -34,7 +36,7 @@ public class Wallet {
 
     }
 
-    public Wallet(User user, Double balance, String currency, String status, int version) {
+    public Wallet(User user, Double balance, String currency, WalletStatus status, int version) {
         this.user = user;
         this.balance = balance;
         this.currency = currency;
@@ -75,11 +77,11 @@ public class Wallet {
         this.currency = currency;
     }
 
-    public String getStatus() {
+    public WalletStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(WalletStatus status) {
         this.status = status;
     }
 
@@ -91,11 +93,4 @@ public class Wallet {
         this.version = version;
     }
 
-//    public Date getDate() {
-//        return date;
-//    }
-//
-//    public void setDate(Date date) {
-//        this.date = date;
-//    }
 }

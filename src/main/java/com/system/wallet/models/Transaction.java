@@ -1,5 +1,7 @@
 package com.system.wallet.models;
 
+import com.system.wallet.config.TransactionStatus;
+import com.system.wallet.config.TransactionType;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -25,10 +27,12 @@ public class Transaction {
     private Double amount;
 
     @Column(name = "types")
-    private String types;
+    @Enumerated(EnumType.STRING)
+    private TransactionType types;
 
     @Column(name = "status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private TransactionStatus status;
 
     @Column(name = "ref_no")
     private int ref_no;
@@ -40,7 +44,7 @@ public class Transaction {
 
     }
 
-    public Transaction(Wallet from_wallet_id, Wallet to_wallet_id, Double amount, String types, String status, int ref_no, Date created_at) {
+    public Transaction(Wallet from_wallet_id, Wallet to_wallet_id, Double amount, TransactionType types, TransactionStatus status, int ref_no, Date created_at) {
         this.from_wallet_id = from_wallet_id;
         this.to_wallet_id = to_wallet_id;
         this.amount = amount;
@@ -82,19 +86,19 @@ public class Transaction {
         this.amount = amount;
     }
 
-    public String getTypes() {
+    public TransactionType getTypes() {
         return types;
     }
 
-    public void setTypes(String types) {
+    public void setTypes(TransactionType types) {
         this.types = types;
     }
 
-    public String getStatus() {
+    public TransactionStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(TransactionStatus status) {
         this.status = status;
     }
 
