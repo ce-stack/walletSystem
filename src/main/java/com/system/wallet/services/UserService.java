@@ -2,14 +2,12 @@ package com.system.wallet.services;
 
 import com.system.wallet.dto.request.TransferWalletRequest;
 import com.system.wallet.dto.request.WalletRequest;
+import com.system.wallet.models.Ledger_entry;
 import com.system.wallet.models.Transaction;
 import com.system.wallet.models.User;
 import com.system.wallet.models.Wallet;
 import com.system.wallet.payload.ApiResponse;
-import com.system.wallet.repositories.TransactionRepository;
-import com.system.wallet.repositories.UserRepository;
-import com.system.wallet.repositories.UserRepositoryCustom;
-import com.system.wallet.repositories.WalletRepository;
+import com.system.wallet.repositories.*;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -22,12 +20,14 @@ public class UserService {
     private UserRepository userRepository;
     private WalletRepository walletRepository;
     private TransactionRepository transactionRepository;
+    private LedgerEntryRepository ledgerEntryRepository;
 
-    public UserService(UserRepositoryCustom userRepositoryCustom , UserRepository userRepository , WalletRepository walletRepository , TransactionRepository transactionRepository) {
+    public UserService(UserRepositoryCustom userRepositoryCustom , UserRepository userRepository , WalletRepository walletRepository , TransactionRepository transactionRepository , LedgerEntryRepository ledgerEntryRepository) {
         this.userRepositoryCustom = userRepositoryCustom;
         this.userRepository = userRepository;
         this.walletRepository = walletRepository;
         this.transactionRepository = transactionRepository;
+        this.ledgerEntryRepository = ledgerEntryRepository;
     }
 
     public ApiResponse create_wallet(WalletRequest walletRequest) {
@@ -86,14 +86,15 @@ public class UserService {
             return new ApiResponse("Insufficient balance", false, 400);
         }
 
-        afterPayment(fromWallet, toWallet, amount);
 
-        storeTheTransaction(transferWalletRequest, fromWallet, toWallet);
-
+       Transaction transaction = storeTheTransaction(transferWalletRequest, fromWallet, toWallet);
+       Ledger_entry sender = createLedgerEntry(transaction , fromWallet , "sender");
+       Ledger_entry receiver = createLedgerEntry(transaction , toWallet , "receiver");
+       afterPayment(fromWallet, toWallet, amount);
         return new ApiResponse("transfer done!", true, 200);
     }
 
-    private void storeTheTransaction(TransferWalletRequest transferWalletRequest,Wallet fromWallet,Wallet toWallet) {
+    private Transaction storeTheTransaction(TransferWalletRequest transferWalletRequest,Wallet fromWallet,Wallet toWallet) {
         Transaction transaction = new Transaction();
 
         transaction.setAmount(transferWalletRequest.getAmount());
@@ -104,8 +105,8 @@ public class UserService {
         transaction.setStatus("done");
         transaction.setRef_no(generateRefNo());
         transaction.setTypes("transfer");
+        return transactionRepository.save(transaction);
 
-        transactionRepository.save(transaction);
     }
 
     private boolean checkIfWalletsNotTheSame(Integer fromWalletId, Integer toWalletId) {
@@ -119,13 +120,10 @@ public class UserService {
     }
 
     private void afterPayment(Wallet fromWallet, Wallet toWallet, Double amount) {
-
         Double newBalanceFrom = fromWallet.getBalance() - amount;
         fromWallet.setBalance(newBalanceFrom);
-
         Double newBalanceTo = toWallet.getBalance() + amount;
         toWallet.setBalance(newBalanceTo);
-
         walletRepository.save(fromWallet);
         walletRepository.save(toWallet);
     }
@@ -139,5 +137,24 @@ public class UserService {
         return (int) (System.currentTimeMillis() % 1000000000);
     }
 
-    private void createLedgerEntry(){}
+    private Ledger_entry createLedgerEntry(Transaction transaction , Wallet wallet, String setType) {
+        Ledger_entry ledger_entry = new Ledger_entry();
+        Double balanceAfter = calcBalanceAfter(wallet , transaction , setType);
+        ledger_entry.setAmount(transaction.getAmount());
+        ledger_entry.setWallet_id(transaction.getFrom_wallet_id());
+        ledger_entry.setBalance_after(balanceAfter);
+        ledger_entry.setTypes(setType);
+        ledger_entry.setCreated_at(new Date());
+        ledger_entry.setTransaction_id(transaction);
+        return ledgerEntryRepository.save(ledger_entry);
+    }
+
+    private Double calcBalanceAfter(Wallet wallet, Transaction transaction , String setType) {
+        if("sender".equals(setType)) {
+            return wallet.getBalance() - transaction.getAmount();
+        } else if("receiver".equals(setType)) {
+            return wallet.getBalance() + transaction.getAmount();
+        }
+        throw new IllegalArgumentException("Unknown set type: " + setType);
+    }
 }

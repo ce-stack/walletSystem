@@ -20,8 +20,8 @@ public class Ledger_entry {
     @JoinColumn(name = "wallet_id")
     private Wallet wallet_id;
 
-    @Column(name = "type")
-    private String type;
+    @Column(name = "types")
+    private String types;
 
     @Column(name = "amount")
     private Double amount;
@@ -36,10 +36,10 @@ public class Ledger_entry {
 
     }
 
-    public Ledger_entry(Transaction transaction_id, Wallet wallet_id, String type, Double amount, Double balance_after, Date created_at) {
+    public Ledger_entry(Transaction transaction_id, Wallet wallet_id, String types, Double amount, Double balance_after, Date created_at) {
         this.transaction_id = transaction_id;
         this.wallet_id = wallet_id;
-        this.type = type;
+        this.types = types;
         this.amount = amount;
         this.balance_after = balance_after;
         this.created_at = created_at;
@@ -69,12 +69,12 @@ public class Ledger_entry {
         this.wallet_id = wallet_id;
     }
 
-    public String getType() {
-        return type;
+    public String getTypes() {
+        return types;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setTypes(String types) {
+        this.types = types;
     }
 
     public Double getAmount() {
@@ -105,7 +105,7 @@ public class Ledger_entry {
     public String toString() {
         return "Ledger_entry{" +
                 "id=" + id +
-                ", type='" + type + '\'' +
+                ", types='" + types + '\'' +
                 ", amount=" + amount +
                 ", balance_after=" + balance_after +
                 ", created_at=" + created_at +
