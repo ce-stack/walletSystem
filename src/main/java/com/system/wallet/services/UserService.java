@@ -138,4 +138,6 @@ public class UserService {
     private Integer generateRefNo() {
         return (int) (System.currentTimeMillis() % 1000000000);
     }
+
+    private void createLedgerEntry(){}
 }

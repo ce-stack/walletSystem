@@ -6,7 +6,4 @@ import com.system.wallet.models.Wallet;
 public interface UserRepositoryCustom {
 
     void creteWallet(Wallet wallet);
-
-    void transferForWallet(Transaction  transaction , Wallet wallet);
-
 }

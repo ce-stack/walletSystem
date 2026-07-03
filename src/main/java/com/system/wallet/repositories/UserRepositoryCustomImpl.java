@@ -22,9 +22,4 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         entityManager.persist(wallet);
     }
 
-    @Override
-    public void transferForWallet(Transaction transaction, Wallet wallet) {
-        entityManager.persist(transaction);
-    }
-
 }
