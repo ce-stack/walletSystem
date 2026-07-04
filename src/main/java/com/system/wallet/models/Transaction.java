@@ -1,7 +1,7 @@
 package com.system.wallet.models;
 
-import com.system.wallet.config.TransactionStatus;
-import com.system.wallet.config.TransactionType;
+import com.system.wallet.config.enums.TransactionStatus;
+import com.system.wallet.config.enums.TransactionType;
 import jakarta.persistence.*;
 
 import java.util.Date;

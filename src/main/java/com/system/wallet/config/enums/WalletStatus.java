@@ -1,4 +1,4 @@
-package com.system.wallet.config;
+package com.system.wallet.config.enums;
 
 public enum WalletStatus {
     ACTIVE,

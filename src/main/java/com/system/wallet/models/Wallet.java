@@ -1,9 +1,7 @@
 package com.system.wallet.models;
 
-import com.system.wallet.config.WalletStatus;
+import com.system.wallet.config.enums.WalletStatus;
 import jakarta.persistence.*;
-
-import java.util.Date;
 
 @Entity
 @Table(name = "wallets")

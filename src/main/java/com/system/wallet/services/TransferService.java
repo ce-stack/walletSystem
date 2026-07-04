@@ -1,9 +1,9 @@
 package com.system.wallet.services;
 
-import com.system.wallet.config.LedgerType;
-import com.system.wallet.config.TransactionStatus;
-import com.system.wallet.config.TransactionType;
-import com.system.wallet.config.WalletStatus;
+import com.system.wallet.config.enums.LedgerType;
+import com.system.wallet.config.enums.TransactionStatus;
+import com.system.wallet.config.enums.TransactionType;
+import com.system.wallet.config.enums.WalletStatus;
 import com.system.wallet.dto.request.TransferWalletRequest;
 import com.system.wallet.dto.request.WalletRequest;
 import com.system.wallet.models.Ledger_entry;

@@ -1,6 +1,6 @@
 package com.system.wallet.models;
 
-import com.system.wallet.config.LedgerType;
+import com.system.wallet.config.enums.LedgerType;
 import jakarta.persistence.*;
 
 import java.util.Date;
