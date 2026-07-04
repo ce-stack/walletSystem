@@ -1,4 +1,7 @@
 package com.system.wallet.config.twilio;
 
-public class TwilioConfig {
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@ConfigurationProperties(prefix = "twilio")
+public record TwilioConfig(String accountSid , String authToken , String verifyServiceSid) {
 }
