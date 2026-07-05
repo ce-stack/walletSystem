@@ -1,4 +1,8 @@
 package com.system.wallet.services;
 
-public class OtpService {
+public interface OtpService {
+
+    void sendOtp(String phoneNumber);
+
+    boolean verifyOtp(String phoneNumber , String code);
 }
