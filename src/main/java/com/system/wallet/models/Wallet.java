@@ -28,6 +28,9 @@ public class Wallet {
     @Column(name = "version")
     private int version;
 
+    @Column(name = "phone_number")
+    private String phone_number;
+
 
 
     public Wallet() {

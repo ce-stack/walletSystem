@@ -1,0 +1,2 @@
+ALTER TABLE wallets
+    ADD COLUMN phone_number VARCHAR(255) DEFAULT NULL
