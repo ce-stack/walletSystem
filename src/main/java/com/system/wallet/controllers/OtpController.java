@@ -3,7 +3,7 @@ package com.system.wallet.controllers;
 import com.system.wallet.dto.request.otp.SendOtpRequest;
 import com.system.wallet.dto.request.otp.VerifyOtpRequest;
 import com.system.wallet.dto.response.dto.VerifyOtpResponse;
-import com.system.wallet.services.OtpService;
+import com.system.wallet.services.otp.OtpService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

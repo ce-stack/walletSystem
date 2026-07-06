@@ -1,4 +1,4 @@
-package com.system.wallet.services;
+package com.system.wallet.services.otp;
 
 public interface OtpService {
 

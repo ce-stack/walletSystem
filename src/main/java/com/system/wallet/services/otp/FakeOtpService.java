@@ -1,4 +1,4 @@
-package com.system.wallet.services;
+package com.system.wallet.services.otp;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

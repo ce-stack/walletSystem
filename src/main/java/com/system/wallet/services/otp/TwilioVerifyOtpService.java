@@ -1,7 +1,6 @@
-package com.system.wallet.services;
+package com.system.wallet.services.otp;
 
 
-import com.system.wallet.config.twilio.TwilioConfig;
 import com.twilio.Twilio;
 import com.twilio.exception.ApiException;
 import com.twilio.rest.verify.v2.service.Verification;
@@ -15,11 +14,16 @@ import org.springframework.stereotype.Service;
 @ConditionalOnProperty(name = "otp.provider" , havingValue = "twilio")
 public class TwilioVerifyOtpService implements OtpService{
 
-
     private final String accountSid;
     private final String authToken;
     private final String verifyServiceSid;
 
+    public TwilioVerifyOtpService(@Value("${TWILIO_ACCOUNT_SID}") String accountSid,@Value("${TWILIO_AUTH_TOKEN}") String authToken,@Value("${TWILIO_VERIFY_SERVICE_SID}") String verifyServiceSid) {
+        this.accountSid = accountSid;
+        this.authToken = authToken;
+        this.verifyServiceSid = verifyServiceSid;
+
+    }
 
     @PostConstruct
     void initTwilio() {
@@ -27,14 +31,6 @@ public class TwilioVerifyOtpService implements OtpService{
             throw new IllegalArgumentException("Twilio configuration parameters are not valid");
         }
         Twilio.init(accountSid, authToken);
-    }
-
-
-    public TwilioVerifyOtpService(@Value("${TWILIO_ACCOUNT_SID}") String accountSid,@Value("${TWILIO_AUTH_TOKEN}") String authToken,@Value("${TWILIO_VERIFY_SERVICE_SID}") String verifyServiceSid) {
-        this.accountSid = accountSid;
-        this.authToken = authToken;
-        this.verifyServiceSid = verifyServiceSid;
-
     }
 
     @Override
@@ -49,8 +45,6 @@ public class TwilioVerifyOtpService implements OtpService{
             throw new IllegalStateException(ex);
         }
     }
-
-
 
     @Override
     public boolean verifyOtp(String phoneNumber, String code) {
@@ -70,6 +64,5 @@ public class TwilioVerifyOtpService implements OtpService{
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
-
-
+    
 }
