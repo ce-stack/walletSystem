@@ -12,6 +12,7 @@ import com.system.wallet.models.User;
 import com.system.wallet.models.Wallet;
 import com.system.wallet.payload.ApiResponse;
 import com.system.wallet.repositories.*;
+import com.system.wallet.services.otp.OtpService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -25,13 +26,15 @@ public class TransferService {
     private WalletRepository walletRepository;
     private TransactionRepository transactionRepository;
     private LedgerEntryRepository ledgerEntryRepository;
+    private OtpService otpService;
 
-    public TransferService(UserRepositoryCustom userRepositoryCustom , UserRepository userRepository , WalletRepository walletRepository , TransactionRepository transactionRepository , LedgerEntryRepository ledgerEntryRepository) {
+    public TransferService(UserRepositoryCustom userRepositoryCustom , UserRepository userRepository , WalletRepository walletRepository , TransactionRepository transactionRepository , LedgerEntryRepository ledgerEntryRepository , OtpService otpService ) {
         this.userRepositoryCustom = userRepositoryCustom;
         this.userRepository = userRepository;
         this.walletRepository = walletRepository;
         this.transactionRepository = transactionRepository;
         this.ledgerEntryRepository = ledgerEntryRepository;
+        this.otpService = otpService;
     }
 
     public ApiResponse create_wallet(WalletRequest walletRequest) {
@@ -87,10 +90,11 @@ public class TransferService {
         if (fromWallet.getBalance() < amount) {
             return new ApiResponse("Insufficient balance", false, 400);
         }
-       Transaction transaction = storeTheTransaction(transferWalletRequest, fromWallet, toWallet);
-       Ledger_entry sender = createLedgerEntry(transaction , fromWallet , LedgerType.SENDER);
-       Ledger_entry receiver = createLedgerEntry(transaction , toWallet , LedgerType.RECEIVER);
-       afterPayment(fromWallet, toWallet, amount);
+
+        Transaction transaction = storeTheTransaction(transferWalletRequest, fromWallet, toWallet);
+        Ledger_entry sender = createLedgerEntry(transaction , fromWallet , LedgerType.SENDER);
+        Ledger_entry receiver = createLedgerEntry(transaction , toWallet , LedgerType.RECEIVER);
+        afterPayment(fromWallet, toWallet, amount);
         return new ApiResponse("transfer done!", true, 200);
     }
 
