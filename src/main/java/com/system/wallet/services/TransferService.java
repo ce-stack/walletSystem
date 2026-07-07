@@ -98,11 +98,12 @@ public class TransferService {
         data.put("sender phone number", fromWallet.getPhone_number());
         data.put("sender wallet number" , fromWallet.getId());
         data.put("receiver wallet number", toWallet.getId());
+        data.put("the amount to be transferred", amount);
         twilioVerifyOtpService.sendOtp(transferWalletRequest.getPhoneNumber());
         Transaction transaction = storeTheTransaction(transferWalletRequest, fromWallet, toWallet);
         Ledger_entry sender = createLedgerEntry(transaction , fromWallet , LedgerType.SENDER);
         Ledger_entry receiver = createLedgerEntry(transaction , toWallet , LedgerType.RECEIVER);
-        afterPayment(fromWallet, toWallet, amount);
+
         return new ApiResponse("transfer is pending enter the otp check your SMS!" ,  true, 200 , data
         );
     }
@@ -125,15 +126,6 @@ public class TransferService {
 
     private boolean checkWalletStatus(Wallet wallet) {
         return wallet.getStatus() == WalletStatus.ACTIVE;
-    }
-
-    private void afterPayment(Wallet fromWallet, Wallet toWallet, Double amount) {
-        Double newBalanceFrom = fromWallet.getBalance() - amount;
-        fromWallet.setBalance(newBalanceFrom);
-        Double newBalanceTo = toWallet.getBalance() + amount;
-        toWallet.setBalance(newBalanceTo);
-        walletRepository.save(fromWallet);
-        walletRepository.save(toWallet);
     }
 
     private Wallet getWalletForUpdateOrThrow(Integer walletId) {

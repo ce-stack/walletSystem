@@ -21,11 +21,14 @@ public class VerifyOtpRequest {
     @Pattern(regexp = "^\\d{4,8}$",message = "OTP code must contain digits only")
     public String code;
 
-    public VerifyOtpRequest(String fromPhoneNumber, int from_wallet_id, int to_wallet_id, String code) {
+    private Double amount;
+
+    public VerifyOtpRequest(String fromPhoneNumber, int from_wallet_id, int to_wallet_id, String code ,  Double amount) {
         this.fromPhoneNumber = fromPhoneNumber;
         this.from_wallet_id = from_wallet_id;
         this.to_wallet_id = to_wallet_id;
         this.code = code;
+        this.amount = amount;
     }
 
 
@@ -59,5 +62,13 @@ public class VerifyOtpRequest {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public Double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Double amount) {
+        this.amount = amount;
     }
 }
