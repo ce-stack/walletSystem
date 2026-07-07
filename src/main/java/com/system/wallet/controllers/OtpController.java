@@ -1,8 +1,10 @@
 package com.system.wallet.controllers;
 
+import com.system.wallet.dto.request.TransferWalletRequest;
 import com.system.wallet.dto.request.otp.SendOtpRequest;
 import com.system.wallet.dto.request.otp.VerifyOtpRequest;
 import com.system.wallet.dto.response.dto.VerifyOtpResponse;
+import com.system.wallet.payload.ApiResponse;
 import com.system.wallet.services.otp.OtpService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -28,9 +30,14 @@ public class OtpController {
 
 
     @PostMapping("/verify")
-    public ResponseEntity<VerifyOtpResponse> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
-        boolean verified = otpService.verifyOtp(request.phoneNumber, request.code);
-        return ResponseEntity.ok(new VerifyOtpResponse(verified));
+    public ApiResponse verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
+        boolean verified = otpService.verifyOtp(request);
+        if(verified == true) {
+            return new ApiResponse("Transfer is done" , true , 200);
+        } else {
+            return new ApiResponse("Error tyr later !" , false , 400);
+        }
+
     }
 
 

@@ -1,5 +1,7 @@
 package com.system.wallet.services.otp;
 
+import com.system.wallet.dto.request.TransferWalletRequest;
+import com.system.wallet.dto.request.otp.VerifyOtpRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -21,7 +23,7 @@ public class FakeOtpService implements OtpService{
     }
 
     @Override
-    public boolean verifyOtp(String phoneNumber, String code) {
-        return fakeCode.equals(code);
+    public boolean verifyOtp(VerifyOtpRequest verifyOtpRequest) {
+        return fakeCode.equals(verifyOtpRequest.getCode());
     }
 }

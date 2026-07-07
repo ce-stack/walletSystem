@@ -13,6 +13,7 @@ import com.system.wallet.models.Wallet;
 import com.system.wallet.payload.ApiResponse;
 import com.system.wallet.repositories.*;
 import com.system.wallet.services.otp.OtpService;
+import com.system.wallet.services.otp.TwilioVerifyOtpService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -26,15 +27,15 @@ public class TransferService {
     private WalletRepository walletRepository;
     private TransactionRepository transactionRepository;
     private LedgerEntryRepository ledgerEntryRepository;
-    private OtpService otpService;
+    private TwilioVerifyOtpService twilioVerifyOtpService;
 
-    public TransferService(UserRepositoryCustom userRepositoryCustom , UserRepository userRepository , WalletRepository walletRepository , TransactionRepository transactionRepository , LedgerEntryRepository ledgerEntryRepository , OtpService otpService ) {
+    public TransferService(UserRepositoryCustom userRepositoryCustom , UserRepository userRepository , WalletRepository walletRepository , TransactionRepository transactionRepository , LedgerEntryRepository ledgerEntryRepository , TwilioVerifyOtpService twilioVerifyOtpService ) {
         this.userRepositoryCustom = userRepositoryCustom;
         this.userRepository = userRepository;
         this.walletRepository = walletRepository;
         this.transactionRepository = transactionRepository;
         this.ledgerEntryRepository = ledgerEntryRepository;
-        this.otpService = otpService;
+        this.twilioVerifyOtpService = twilioVerifyOtpService;
     }
 
     public ApiResponse create_wallet(WalletRequest walletRequest) {
@@ -90,12 +91,12 @@ public class TransferService {
         if (fromWallet.getBalance() < amount) {
             return new ApiResponse("Insufficient balance", false, 400);
         }
-
+        twilioVerifyOtpService.sendOtp(transferWalletRequest.getPhoneNumber());
         Transaction transaction = storeTheTransaction(transferWalletRequest, fromWallet, toWallet);
         Ledger_entry sender = createLedgerEntry(transaction , fromWallet , LedgerType.SENDER);
         Ledger_entry receiver = createLedgerEntry(transaction , toWallet , LedgerType.RECEIVER);
         afterPayment(fromWallet, toWallet, amount);
-        return new ApiResponse("transfer done!", true, 200);
+        return new ApiResponse("transfer is pending enter the otp check your SMS!", true, 200);
     }
 
     private Transaction storeTheTransaction(TransferWalletRequest transferWalletRequest,Wallet fromWallet,Wallet toWallet) {
@@ -103,11 +104,12 @@ public class TransferService {
         transaction.setAmount(transferWalletRequest.getAmount());
         transaction.setFrom_wallet_id(fromWallet);
         transaction.setTo_wallet_id(toWallet);
-        transaction.setStatus(TransactionStatus.DONE);
+        transaction.setStatus(TransactionStatus.PENDING);
         transaction.setRef_no(generateRefNo());
         transaction.setTypes(TransactionType.TRANSFER);
         return transactionRepository.save(transaction);
     }
+
 
     private boolean checkIfWalletsNotTheSame(Integer fromWalletId, Integer toWalletId) {
         return !fromWalletId.equals(toWalletId);

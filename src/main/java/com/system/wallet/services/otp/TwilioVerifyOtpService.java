@@ -1,6 +1,10 @@
 package com.system.wallet.services.otp;
 
 
+import com.system.wallet.config.enums.TransactionStatus;
+import com.system.wallet.dto.request.otp.VerifyOtpRequest;
+import com.system.wallet.models.Transaction;
+import com.system.wallet.repositories.TransactionRepository;
 import com.twilio.Twilio;
 import com.twilio.exception.ApiException;
 import com.twilio.rest.verify.v2.service.Verification;
@@ -8,7 +12,11 @@ import com.twilio.rest.verify.v2.service.VerificationCheck;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+
+import java.util.List;
 
 @Service
 @ConditionalOnProperty(name = "otp.provider" , havingValue = "twilio")
@@ -17,12 +25,13 @@ public class TwilioVerifyOtpService implements OtpService{
     private final String accountSid;
     private final String authToken;
     private final String verifyServiceSid;
+    private TransactionRepository transactionRepository;
 
-    public TwilioVerifyOtpService(@Value("${TWILIO_ACCOUNT_SID}") String accountSid,@Value("${TWILIO_AUTH_TOKEN}") String authToken,@Value("${TWILIO_VERIFY_SERVICE_SID}") String verifyServiceSid) {
+    public TwilioVerifyOtpService(@Value("${TWILIO_ACCOUNT_SID}") String accountSid,@Value("${TWILIO_AUTH_TOKEN}") String authToken,@Value("${TWILIO_VERIFY_SERVICE_SID}") String verifyServiceSid , TransactionRepository transactionRepository) {
         this.accountSid = accountSid;
         this.authToken = authToken;
         this.verifyServiceSid = verifyServiceSid;
-
+        this.transactionRepository = transactionRepository;
     }
 
     @PostConstruct
@@ -47,18 +56,37 @@ public class TwilioVerifyOtpService implements OtpService{
     }
 
     @Override
-    public boolean verifyOtp(String phoneNumber, String code) {
+    public boolean verifyOtp(VerifyOtpRequest verifyOtpRequest) {
         try {
             VerificationCheck verificationCheck = VerificationCheck.creator(
                             verifyServiceSid
             )
-            .setTo(phoneNumber)
-            .setCode(code)
+            .setTo(verifyOtpRequest.getFromPhoneNumber())
+            .setCode(verifyOtpRequest.getCode())
             .create();
+
+            getWalletsTransaction(verifyOtpRequest);
             return "Approved".equalsIgnoreCase(verificationCheck.getStatus());
         } catch (ApiException e) {
-            return false;
+            return e.getCode() == 400;
         }
+    }
+
+    private Transaction getWalletsTransaction(VerifyOtpRequest verifyOtpRequest) {
+
+        Transaction transaction = transactionRepository
+                .findLatestTransactions(
+                        verifyOtpRequest.getFrom_wallet_id(),
+                        verifyOtpRequest.getTo_wallet_id(),
+                        PageRequest.of(0, 1)
+                )
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid wallet transaction"));
+
+        transaction.setStatus(TransactionStatus.DONE);
+
+        return transactionRepository.save(transaction);
     }
 
     private boolean isBlank(String value) {

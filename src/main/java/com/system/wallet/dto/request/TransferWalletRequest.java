@@ -1,6 +1,8 @@
 package com.system.wallet.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class TransferWalletRequest {
@@ -15,18 +17,33 @@ public class TransferWalletRequest {
     @Size(min = 10)
     private Double amount;
 
+
+    @NotBlank(message = "phone number is required")
+
+    public String phoneNumber;
+
+
+    @NotBlank(message = "Otp code is required")
+    @Pattern(regexp = "^\\d{4,8}$",message = "OTP code must contain digits only")
+    public String code;
+
     private String types;
 
     private int ref_no;
+
+
+
 
     public TransferWalletRequest() {
 
     }
 
-    public TransferWalletRequest(int from_wallet_id, int to_wallet_id, Double amount) {
+    public TransferWalletRequest(int from_wallet_id, int to_wallet_id, Double amount, String phoneNumber, String code) {
         this.from_wallet_id = from_wallet_id;
         this.to_wallet_id = to_wallet_id;
         this.amount = amount;
+        this.phoneNumber = phoneNumber;
+        this.code = code;
     }
 
     public int getFrom_wallet_id() {
@@ -67,6 +84,23 @@ public class TransferWalletRequest {
 
     public void setRef_no(int ref_no) {
         this.ref_no = ref_no;
+    }
+
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     @Override
