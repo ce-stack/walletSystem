@@ -73,7 +73,6 @@ public class TwilioVerifyOtpService implements OtpService{
     }
 
     private Transaction getWalletsTransaction(VerifyOtpRequest verifyOtpRequest) {
-
         Transaction transaction = transactionRepository
                 .findLatestTransactions(
                         verifyOtpRequest.getFrom_wallet_id(),

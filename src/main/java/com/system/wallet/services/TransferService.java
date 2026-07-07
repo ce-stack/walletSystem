@@ -18,6 +18,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class TransferService {
@@ -91,12 +93,18 @@ public class TransferService {
         if (fromWallet.getBalance() < amount) {
             return new ApiResponse("Insufficient balance", false, 400);
         }
+
+        Map<String , Object> data = new HashMap<>();
+        data.put("sender phone number", fromWallet.getPhone_number());
+        data.put("sender wallet number" , fromWallet.getId());
+        data.put("receiver wallet number", toWallet.getId());
         twilioVerifyOtpService.sendOtp(transferWalletRequest.getPhoneNumber());
         Transaction transaction = storeTheTransaction(transferWalletRequest, fromWallet, toWallet);
         Ledger_entry sender = createLedgerEntry(transaction , fromWallet , LedgerType.SENDER);
         Ledger_entry receiver = createLedgerEntry(transaction , toWallet , LedgerType.RECEIVER);
         afterPayment(fromWallet, toWallet, amount);
-        return new ApiResponse("transfer is pending enter the otp check your SMS!", true, 200);
+        return new ApiResponse("transfer is pending enter the otp check your SMS!" ,  true, 200 , data
+        );
     }
 
     private Transaction storeTheTransaction(TransferWalletRequest transferWalletRequest,Wallet fromWallet,Wallet toWallet) {
