@@ -12,6 +12,7 @@ import com.twilio.exception.ApiException;
 import com.twilio.rest.verify.v2.service.Verification;
 import com.twilio.rest.verify.v2.service.VerificationCheck;
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.PageRequest;
@@ -60,6 +61,7 @@ public class TwilioVerifyOtpService implements OtpService{
     }
 
     @Override
+    @Transactional
     public boolean verifyOtp(VerifyOtpRequest verifyOtpRequest) {
         try {
             VerificationCheck verificationCheck = VerificationCheck.creator(
@@ -90,6 +92,7 @@ public class TwilioVerifyOtpService implements OtpService{
                 .findLatestTransactions(
                         verifyOtpRequest.getFrom_wallet_id(),
                         verifyOtpRequest.getTo_wallet_id(),
+                        TransactionStatus.PENDING,
                         PageRequest.of(0, 1)
                 )
                 .stream()
