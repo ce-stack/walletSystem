@@ -29,11 +29,10 @@ public class User {
 
     }
 
-    public User(String name, String email, String password, Date created_at) {
+    public User(String name, String email, String password) {
         this.name = name;
         this.email = email;
         this.password = password;
-        this.created_at = created_at;
     }
 
     public int getId() {

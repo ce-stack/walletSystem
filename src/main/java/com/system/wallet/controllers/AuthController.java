@@ -19,6 +19,6 @@ public class AuthController {
     }
 
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
-        return new ResponseEntity.ok(authService.createYourAccount(registerRequest);
+        return ResponseEntity.ok(authService.createYourAccount(registerRequest));
     }
 }
