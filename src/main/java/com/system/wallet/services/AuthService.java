@@ -21,7 +21,7 @@ public class AuthService implements AuthRepository {
         this.jwtUtils = jwtUtils;
     }
 
-    public AuthRepository createYourAccount(RegisterRequest request) {
+    public AuthResponse createYourAccount(RegisterRequest request) {
         if(userRepository.existsByEmail(request.getEmail())) {
             throw new ResourceNotFoundException("email already exist");
         }
@@ -30,6 +30,6 @@ public class AuthService implements AuthRepository {
         User newUser = new User(hashedPassword , request.getEmail(), request.getFull_name());
         userRepository.save(newUser);
         jwtUtils.generateJwtToken(newUser.getEmail());
-        return new AuthResponse(jwtUtils.generateJwtToken(newUser.getEmail()), "user created" , true);
+        return new AuthResponse(jwtUtils.generateJwtToken(newUser.getEmail()), newUser.getEmail(), newUser.getName());
     }
 }
