@@ -8,7 +8,9 @@ import com.system.wallet.repositories.AuthRepository;
 import com.system.wallet.repositories.UserRepository;
 import com.system.wallet.security.JwtUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
+@Service
 public class AuthService implements AuthRepository {
 
     private final PasswordEncoder passwordEncoder;
@@ -27,7 +29,8 @@ public class AuthService implements AuthRepository {
         }
 
         String hashedPassword = passwordEncoder.encode(request.getPassword());
-        User newUser = new User(hashedPassword , request.getEmail(), request.getFull_name());
+        //User newUser = new User(hashedPassword , request.getEmail(), request.getFull_name());
+        User newUser = new User(request.getFull_name(),  request.getEmail(), hashedPassword);
         userRepository.save(newUser);
         jwtUtils.generateJwtToken(newUser.getEmail());
         return new AuthResponse(jwtUtils.generateJwtToken(newUser.getEmail()), newUser.getEmail(), newUser.getName());
