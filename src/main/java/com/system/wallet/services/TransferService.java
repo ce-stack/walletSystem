@@ -1,5 +1,6 @@
 package com.system.wallet.services;
 
+import com.system.wallet.config.auth.AuthUser;
 import com.system.wallet.config.enums.LedgerType;
 import com.system.wallet.config.enums.TransactionStatus;
 import com.system.wallet.config.enums.TransactionType;
@@ -32,28 +33,27 @@ public class TransferService {
     private TransactionRepository transactionRepository;
     private LedgerEntryRepository ledgerEntryRepository;
     private TwilioVerifyOtpService twilioVerifyOtpService;
+    private AuthUser authUser;
 
-    public TransferService(UserRepositoryCustom userRepositoryCustom , UserRepository userRepository , WalletRepository walletRepository , TransactionRepository transactionRepository , LedgerEntryRepository ledgerEntryRepository , TwilioVerifyOtpService twilioVerifyOtpService ) {
+    public TransferService(UserRepositoryCustom userRepositoryCustom , UserRepository userRepository , WalletRepository walletRepository , TransactionRepository transactionRepository , LedgerEntryRepository ledgerEntryRepository , TwilioVerifyOtpService twilioVerifyOtpService , AuthUser authUser ) {
         this.userRepositoryCustom = userRepositoryCustom;
         this.userRepository = userRepository;
         this.walletRepository = walletRepository;
         this.transactionRepository = transactionRepository;
         this.ledgerEntryRepository = ledgerEntryRepository;
         this.twilioVerifyOtpService = twilioVerifyOtpService;
+        this.authUser = authUser;
     }
 
     public ApiResponse create_wallet(WalletRequest walletRequest) {
         Wallet wallet = new Wallet();
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Default user with id 1 not found"));
+        User user = authUser.user();
         wallet.setUser(user);
         wallet.setBalance(walletRequest.getBalance());
         wallet.setCurrency("EGP");
         wallet.setStatus(WalletStatus.ACTIVE);
+        wallet.setPhone_number(walletRequest.getPhone_number());
         wallet.setVersion(1);
 
         userRepositoryCustom.creteWallet(wallet);

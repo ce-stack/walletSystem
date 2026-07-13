@@ -1,9 +1,6 @@
 package com.system.wallet.controllers;
-
-import com.system.wallet.dto.request.TransferWalletRequest;
 import com.system.wallet.dto.request.otp.SendOtpRequest;
 import com.system.wallet.dto.request.otp.VerifyOtpRequest;
-import com.system.wallet.dto.response.dto.VerifyOtpResponse;
 import com.system.wallet.payload.ApiResponse;
 import com.system.wallet.services.otp.OtpService;
 import jakarta.validation.Valid;

@@ -16,5 +16,5 @@ public interface WalletRepository extends JpaRepository<Wallet, Integer> {
 
     Optional<Wallet> findById(Integer integer);
 
-    void creteWallet(Wallet wallet);
+
 }

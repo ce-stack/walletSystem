@@ -3,7 +3,9 @@ package com.system.wallet.config.enums;
 public enum Auth {
 
     REGISTER("api/auth/register"),
-    LOGIN("api/auth/login");
+    LOGIN("api/auth/login"),
+    CreateWallet("api/wallets/create"),
+    Transfer("api/wallets/transfer");
     private final String path;
 
     Auth(String path) {

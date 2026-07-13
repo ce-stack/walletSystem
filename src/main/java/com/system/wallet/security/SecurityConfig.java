@@ -6,6 +6,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -20,14 +21,19 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-        return http
-                .csrf(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable)
+        http
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
+                        .requestMatchers("/api/auth/register", "/error").permitAll()
+                        .requestMatchers("/wallets/create" , "/wallets/transfer").authenticated()
+                        .anyRequest().authenticated()
                 )
-                .build();
+                .addFilterBefore(
+                        new JwtAuthenticationFilter(jwtUtils),
+                        UsernamePasswordAuthenticationFilter.class
+                )
+                .httpBasic(httpBasic -> httpBasic.disable());
+
+        return http.build();
     }
 }
