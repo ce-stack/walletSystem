@@ -15,4 +15,6 @@ public interface WalletRepository extends JpaRepository<Wallet, Integer> {
     Optional<Wallet> findByIdForUpdate(@Param("id") Integer id);
 
     Optional<Wallet> findById(Integer integer);
+
+    void creteWallet(Wallet wallet);
 }

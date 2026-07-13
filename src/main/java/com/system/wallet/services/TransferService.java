@@ -15,6 +15,8 @@ import com.system.wallet.repositories.*;
 import com.system.wallet.services.otp.OtpService;
 import com.system.wallet.services.otp.TwilioVerifyOtpService;
 import jakarta.transaction.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -42,13 +44,17 @@ public class TransferService {
 
     public ApiResponse create_wallet(WalletRequest walletRequest) {
         Wallet wallet = new Wallet();
-        User user = userRepository.findById(2)
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Default user with id 1 not found"));
         wallet.setUser(user);
         wallet.setBalance(walletRequest.getBalance());
-        wallet.setCurrency(walletRequest.getCurrency());
+        wallet.setCurrency("EGP");
         wallet.setStatus(WalletStatus.ACTIVE);
-        wallet.setVersion(walletRequest.getVersion());
+        wallet.setVersion(1);
 
         userRepositoryCustom.creteWallet(wallet);
         return new ApiResponse("wallet created!" , true , 200);
