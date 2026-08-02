@@ -147,7 +147,7 @@ public class TransferService {
         Ledger_entry ledger_entry = new Ledger_entry();
         Double balanceAfter = calcBalanceAfter(wallet , transaction , ledgerType);
         ledger_entry.setAmount(transaction.getAmount());
-        ledger_entry.setWallet_id(transaction.getFrom_wallet_id());
+        ledger_entry.setWallet_id(wallet);
         ledger_entry.setBalance_after(balanceAfter);
         ledger_entry.setTypes(ledgerType);
         ledger_entry.setCreated_at(new Date());
@@ -165,4 +165,5 @@ public class TransferService {
                 throw new RuntimeException("Invalid ledger type");
         }
     }
+
 }
