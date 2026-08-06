@@ -7,22 +7,17 @@ import com.system.wallet.config.enums.TransactionType;
 import com.system.wallet.config.enums.WalletStatus;
 import com.system.wallet.dto.request.TransferWalletRequest;
 import com.system.wallet.dto.request.WalletRequest;
-import com.system.wallet.models.Ledger_entry;
-import com.system.wallet.models.Transaction;
-import com.system.wallet.models.User;
-import com.system.wallet.models.Wallet;
+import com.system.wallet.models.*;
 import com.system.wallet.payload.ApiResponse;
 import com.system.wallet.repositories.*;
-import com.system.wallet.services.otp.OtpService;
 import com.system.wallet.services.otp.TwilioVerifyOtpService;
 import jakarta.transaction.Transactional;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class TransferService {
@@ -33,15 +28,18 @@ public class TransferService {
     private TransactionRepository transactionRepository;
     private LedgerEntryRepository ledgerEntryRepository;
     private TwilioVerifyOtpService twilioVerifyOtpService;
+    private IdempotencyKeyRepository idempotencyKeyRepository;
     private AuthUser authUser;
 
-    public TransferService(UserRepositoryCustom userRepositoryCustom , UserRepository userRepository , WalletRepository walletRepository , TransactionRepository transactionRepository , LedgerEntryRepository ledgerEntryRepository , TwilioVerifyOtpService twilioVerifyOtpService , AuthUser authUser ) {
+    public TransferService(UserRepositoryCustom userRepositoryCustom , UserRepository userRepository , WalletRepository walletRepository , TransactionRepository transactionRepository , LedgerEntryRepository ledgerEntryRepository , TwilioVerifyOtpService twilioVerifyOtpService , AuthUser authUser , IdempotencyKeyRepository idempotencyKeyRepository )
+    {
         this.userRepositoryCustom = userRepositoryCustom;
         this.userRepository = userRepository;
         this.walletRepository = walletRepository;
         this.transactionRepository = transactionRepository;
         this.ledgerEntryRepository = ledgerEntryRepository;
         this.twilioVerifyOtpService = twilioVerifyOtpService;
+        this.idempotencyKeyRepository = idempotencyKeyRepository;
         this.authUser = authUser;
     }
 
@@ -61,7 +59,7 @@ public class TransferService {
     }
 
     @Transactional
-    public ApiResponse transferToWallet(TransferWalletRequest transferWalletRequest) {
+    public ApiResponse transferToWallet(TransferWalletRequest transferWalletRequest , String key) {
 
         Integer fromWalletId = transferWalletRequest.getFrom_wallet_id();
         Integer toWalletId = transferWalletRequest.getTo_wallet_id();
@@ -107,6 +105,11 @@ public class TransferService {
         data.put("the amount to be transferred", amount);
         twilioVerifyOtpService.sendOtp(transferWalletRequest.getPhoneNumber());
         Transaction transaction = storeTheTransaction(transferWalletRequest, fromWallet, toWallet);
+        User user = authUser.user();
+        boolean createedKey = createKeyIfExists(user , key , transaction);
+        if(!createedKey) {
+            return new ApiResponse("Key does not exist", false, 400);
+        }
         Ledger_entry sender = createLedgerEntry(transaction , fromWallet , LedgerType.SENDER);
         Ledger_entry receiver = createLedgerEntry(transaction , toWallet , LedgerType.RECEIVER);
 
@@ -124,7 +127,6 @@ public class TransferService {
         transaction.setTypes(TransactionType.TRANSFER);
         return transactionRepository.save(transaction);
     }
-
 
     private boolean checkIfWalletsNotTheSame(Integer fromWalletId, Integer toWalletId) {
         return !fromWalletId.equals(toWalletId);
@@ -166,4 +168,17 @@ public class TransferService {
         }
     }
 
+    private boolean createKeyIfExists(User user , String key , Transaction transaction) {
+        if(idempotencyKeyRepository.existsByKey(key)) {
+            return false;
+        }
+        Idempotency_key idempotency_key = new Idempotency_key();
+        idempotency_key.setKey(key);
+        idempotency_key.setRequest_hash(UUID.randomUUID().toString());
+        idempotency_key.setTransaction_id(transaction);
+        idempotency_key.setUser_id(user);
+        idempotency_key.setStatus("success");
+        idempotencyKeyRepository.save(idempotency_key);
+        return true;
+    }
 }

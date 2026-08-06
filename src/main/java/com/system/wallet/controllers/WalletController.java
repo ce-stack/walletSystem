@@ -5,10 +5,7 @@ import com.system.wallet.dto.request.TransferWalletRequest;
 import com.system.wallet.dto.request.WalletRequest;
 import com.system.wallet.payload.ApiResponse;
 import com.system.wallet.services.TransferService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/wallets")
@@ -26,8 +23,8 @@ public class WalletController {
     }
 
     @PostMapping("/transfer")
-    public ApiResponse transfer_between_wallets(@RequestBody TransferWalletRequest transferWalletRequest) {
-        return transferService.transferToWallet(transferWalletRequest);
+    public ApiResponse transfer_between_wallets(@RequestParam("idempotency_keys")String key ,@RequestBody TransferWalletRequest transferWalletRequest) {
+        return transferService.transferToWallet(transferWalletRequest , key);
     }
 
 }
