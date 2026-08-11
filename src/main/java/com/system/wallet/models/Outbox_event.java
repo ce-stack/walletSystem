@@ -13,9 +13,11 @@ public class Outbox_event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idempotency_key_id")
-    private Idempotency_key idempotency_key_id;
+    @Column(name = "aggregateType")
+    private String aggregateType;
+
+    @Column(name = "aggerate_id")
+    private Long aggerate_id;
 
     @Column(name = "event_type")
     private String event_type;
@@ -39,14 +41,14 @@ public class Outbox_event {
 
     }
 
-    public Outbox_event(Idempotency_key idempotency_key_id, String event_type, int retry_count, String payload, String status, Date created_at, Date published_at) {
-        this.idempotency_key_id = idempotency_key_id;
+    public Outbox_event(String aggregateType, Long aggerate_id, String event_type, int retry_count, String payload, String status, Date created_at) {
+        this.aggregateType = aggregateType;
+        this.aggerate_id = aggerate_id;
         this.event_type = event_type;
         this.retry_count = retry_count;
         this.payload = payload;
         this.status = status;
         this.created_at = created_at;
-        this.published_at = published_at;
     }
 
     public int getId() {
@@ -57,12 +59,20 @@ public class Outbox_event {
         this.id = id;
     }
 
-    public Idempotency_key getIdempotency_key_id() {
-        return idempotency_key_id;
+    public String getAggregateType() {
+        return aggregateType;
     }
 
-    public void setIdempotency_key_id(Idempotency_key idempotency_key_id) {
-        this.idempotency_key_id = idempotency_key_id;
+    public void setAggregateType(String aggregateType) {
+        this.aggregateType = aggregateType;
+    }
+
+    public Long getAggerate_id() {
+        return aggerate_id;
+    }
+
+    public void setAggerate_id(Long aggerate_id) {
+        this.aggerate_id = aggerate_id;
     }
 
     public String getEvent_type() {
@@ -117,6 +127,8 @@ public class Outbox_event {
     public String toString() {
         return "Outbox_event{" +
                 "id=" + id +
+                ", aggregateType='" + aggregateType + '\'' +
+                ", aggerate_id=" + aggerate_id +
                 ", event_type='" + event_type + '\'' +
                 ", retry_count=" + retry_count +
                 ", payload='" + payload + '\'' +
