@@ -30,8 +30,9 @@ public class TransferService {
     private TwilioVerifyOtpService twilioVerifyOtpService;
     private IdempotencyKeyRepository idempotencyKeyRepository;
     private AuthUser authUser;
+    private OutboxEventsRepository outboxEventsRepository;
 
-    public TransferService(UserRepositoryCustom userRepositoryCustom , UserRepository userRepository , WalletRepository walletRepository , TransactionRepository transactionRepository , LedgerEntryRepository ledgerEntryRepository , TwilioVerifyOtpService twilioVerifyOtpService , AuthUser authUser , IdempotencyKeyRepository idempotencyKeyRepository )
+    public TransferService(UserRepositoryCustom userRepositoryCustom , UserRepository userRepository , WalletRepository walletRepository , TransactionRepository transactionRepository , LedgerEntryRepository ledgerEntryRepository , TwilioVerifyOtpService twilioVerifyOtpService , AuthUser authUser , IdempotencyKeyRepository idempotencyKeyRepository , OutboxEventsRepository outboxEventsRepository )
     {
         this.userRepositoryCustom = userRepositoryCustom;
         this.userRepository = userRepository;
@@ -41,6 +42,7 @@ public class TransferService {
         this.twilioVerifyOtpService = twilioVerifyOtpService;
         this.idempotencyKeyRepository = idempotencyKeyRepository;
         this.authUser = authUser;
+        this.outboxEventsRepository = outboxEventsRepository;
     }
 
     public ApiResponse create_wallet(WalletRequest walletRequest) {
@@ -112,7 +114,7 @@ public class TransferService {
         }
         Ledger_entry sender = createLedgerEntry(transaction , fromWallet , LedgerType.SENDER);
         Ledger_entry receiver = createLedgerEntry(transaction , toWallet , LedgerType.RECEIVER);
-
+       // Outbox_event outbox_event = creatOutBoxEvent(transaction , );
         return new ApiResponse("transfer is pending enter the otp check your SMS!" ,  true, 200 , data
         );
     }
@@ -180,5 +182,16 @@ public class TransferService {
         idempotency_key.setStatus("success");
         idempotencyKeyRepository.save(idempotency_key);
         return true;
+    }
+
+    private void creatOutBoxEvent(Long aggerate_id, String payLoad){
+        Outbox_event outbox_event = new Outbox_event();
+        outbox_event.setAggerate_id(aggerate_id);
+        outbox_event.setPayload(payLoad);
+        outbox_event.setStatus("pending");
+        outbox_event.setEvent_type("transfer");
+        outbox_event.setPublished_at(new Date());
+        outbox_event.setCreated_at(new Date());
+        outboxEventsRepository.save(outbox_event);
     }
 }
