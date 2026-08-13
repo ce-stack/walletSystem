@@ -1,5 +1,7 @@
 package com.system.wallet.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.databind.json.JsonMapper;
 import com.system.wallet.config.auth.AuthUser;
 import com.system.wallet.config.enums.LedgerType;
 import com.system.wallet.config.enums.TransactionStatus;
@@ -31,8 +33,9 @@ public class TransferService {
     private IdempotencyKeyRepository idempotencyKeyRepository;
     private AuthUser authUser;
     private OutboxEventsRepository outboxEventsRepository;
+    private final JsonMapper jsonMapper;
 
-    public TransferService(UserRepositoryCustom userRepositoryCustom , UserRepository userRepository , WalletRepository walletRepository , TransactionRepository transactionRepository , LedgerEntryRepository ledgerEntryRepository , TwilioVerifyOtpService twilioVerifyOtpService , AuthUser authUser , IdempotencyKeyRepository idempotencyKeyRepository , OutboxEventsRepository outboxEventsRepository )
+    public TransferService(UserRepositoryCustom userRepositoryCustom , UserRepository userRepository , WalletRepository walletRepository , TransactionRepository transactionRepository , LedgerEntryRepository ledgerEntryRepository , TwilioVerifyOtpService twilioVerifyOtpService , AuthUser authUser , IdempotencyKeyRepository idempotencyKeyRepository , OutboxEventsRepository outboxEventsRepository, JsonMapper jsonMapper)
     {
         this.userRepositoryCustom = userRepositoryCustom;
         this.userRepository = userRepository;
@@ -43,6 +46,7 @@ public class TransferService {
         this.idempotencyKeyRepository = idempotencyKeyRepository;
         this.authUser = authUser;
         this.outboxEventsRepository = outboxEventsRepository;
+        this.jsonMapper = jsonMapper;
     }
 
     public ApiResponse create_wallet(WalletRequest walletRequest) {
@@ -114,7 +118,7 @@ public class TransferService {
         }
         Ledger_entry sender = createLedgerEntry(transaction , fromWallet , LedgerType.SENDER);
         Ledger_entry receiver = createLedgerEntry(transaction , toWallet , LedgerType.RECEIVER);
-       // Outbox_event outbox_event = creatOutBoxEvent(transaction , );
+        creatOutBoxEvent(transaction);
         return new ApiResponse("transfer is pending enter the otp check your SMS!" ,  true, 200 , data
         );
     }
@@ -184,14 +188,32 @@ public class TransferService {
         return true;
     }
 
-    private void creatOutBoxEvent(Long aggerate_id, String payLoad){
-        Outbox_event outbox_event = new Outbox_event();
-        outbox_event.setAggerate_id(aggerate_id);
-        outbox_event.setPayload(payLoad);
-        outbox_event.setStatus("pending");
-        outbox_event.setEvent_type("transfer");
-        outbox_event.setPublished_at(new Date());
-        outbox_event.setCreated_at(new Date());
-        outboxEventsRepository.save(outbox_event);
+    private void creatOutBoxEvent(Transaction transaction){
+
+        try {
+            Map<String , Object> payload = Map.of(
+                    "transactionId", transaction.getId(),
+                    "fromWalletId", transaction.getFrom_wallet_id(),
+                    "toWalletId", transaction.getTo_wallet_id(),
+                    "amount", transaction.getAmount(),
+                    "status", transaction.getStatus()
+            );
+
+            String payloadJson = jsonMapper.writeValueAsString(payload);
+
+            Outbox_event outboxEvent = new Outbox_event();
+            outboxEvent.setAggregateType("TRANSACTION");
+            outboxEvent.setAggerate_id((long) transaction.getId());
+            outboxEvent.setAggregateType("TRANSFER_COMPLETED");
+            outboxEvent.setPayload(payloadJson);
+            outboxEvent.setStatus("PENDING");
+            outboxEvent.setRetry_count(0);
+            outboxEvent.setCreated_at(new Date());
+            outboxEvent.setPublished_at(null);
+
+            outboxEventsRepository.save(outboxEvent);
+        } catch (Exception  e) {
+            throw new RuntimeException("Failed to create outbox payload", e);
+        }
     }
 }

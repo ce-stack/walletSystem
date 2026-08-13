@@ -25,7 +25,7 @@ public class Outbox_event {
     @Column(name = "retry_count")
     private int retry_count;
 
-    @Column(name = "payload")
+    @Column(name = "payload" , columnDefinition = "TEXT")
     private String payload;
 
     @Column(name = "status")
