@@ -204,7 +204,7 @@ public class TransferService {
             Outbox_event outboxEvent = new Outbox_event();
             outboxEvent.setAggregateType("TRANSACTION");
             outboxEvent.setAggerate_id((long) transaction.getId());
-            outboxEvent.setAggregateType("TRANSFER_COMPLETED");
+            outboxEvent.setEvent_type("TRANSFER_COMPLETED");
             outboxEvent.setPayload(payloadJson);
             outboxEvent.setStatus("PENDING");
             outboxEvent.setRetry_count(0);

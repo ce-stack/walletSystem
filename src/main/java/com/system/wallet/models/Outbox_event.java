@@ -19,6 +19,10 @@ public class Outbox_event {
     @Column(name = "aggerate_id")
     private Long aggerate_id;
 
+    public Outbox_event(String event_type) {
+        this.event_type = event_type;
+    }
+
     @Column(name = "event_type")
     private String event_type;
 
