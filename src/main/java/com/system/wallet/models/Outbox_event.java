@@ -32,7 +32,7 @@ public class Outbox_event {
     private String status;
 
     @Column(name = "created_at")
-    private Date created_at;
+    private Date createdAt;
 
     @Column(name = "published_at")
     private Date published_at;
@@ -48,7 +48,7 @@ public class Outbox_event {
         this.retry_count = retry_count;
         this.payload = payload;
         this.status = status;
-        this.created_at = created_at;
+        this.createdAt = created_at;
     }
 
     public int getId() {
@@ -108,11 +108,11 @@ public class Outbox_event {
     }
 
     public Date getCreated_at() {
-        return created_at;
+        return createdAt;
     }
 
     public void setCreated_at(Date created_at) {
-        this.created_at = created_at;
+        this.createdAt = created_at;
     }
 
     public Date getPublished_at() {
@@ -133,7 +133,7 @@ public class Outbox_event {
                 ", retry_count=" + retry_count +
                 ", payload='" + payload + '\'' +
                 ", status='" + status + '\'' +
-                ", created_at=" + created_at +
+                ", created_at=" + createdAt +
                 ", published_at=" + published_at +
                 '}';
     }

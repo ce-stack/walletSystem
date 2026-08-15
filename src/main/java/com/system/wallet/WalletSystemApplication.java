@@ -4,7 +4,9 @@ import com.system.wallet.config.twilio.TwilioConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
+@EnableScheduling
 @SpringBootApplication
 @EnableConfigurationProperties(TwilioConfig.class)
 public class WalletSystemApplication {
